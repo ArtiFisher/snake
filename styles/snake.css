@@ -18,12 +18,16 @@ td {
 	height: 20px;
 }
 
-.snaked {
+td.snaked {
 	background-color: green;
 }
 
 .apple {
 	background-color: yellow;
+}
+
+.path {
+	background-color: #aaaaaa;	
 }
 
 .scores {
@@ -45,4 +49,4 @@ td {
 
 td:hover {
 	background-color: #dddddd;	
-};
+}

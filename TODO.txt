@@ -1,2 +1,3 @@
 draw a path, follow it, then to pointed cell
 prevent default on some standart things
+time journal

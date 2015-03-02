@@ -17,10 +17,14 @@ function Snake() {
         timeout,
         pointedCell,
         startingCell,
+        pathCell,
+        startToGoForPath,
         currentDelay = INITIAL_DELAY,
         direction = {},
         field = [],
-        snake;
+        snake,
+        mousedown = false,
+        path = [];
 
         points.classList.toggle('points');
         scores.classList.toggle('scores');
@@ -103,8 +107,16 @@ function Snake() {
             this.init();
         }
         else{
-            if(pointedCell !== null){
-                this.mouseDirection();
+            if(path.length !== 0){
+                if(!startToGoForPath){
+                    startToGoForPath = field[snake.cells[0].Y][snake.cells[0].X];
+                }
+                this.pathDirection(startToGoForPath, path[0]);
+            }
+            else{
+                if(pointedCell !== null){
+                    this.mouseDirection();
+                }   
             }
             if (this.eatingApple()) {
                 snake.cells.unshift({
@@ -149,15 +161,98 @@ function Snake() {
                 timeout = setTimeout(this.move.bind(this), currentDelay);
             }
         }
-
-        
     };
 
+    // this.mouseDirection = function(){
+    //     var startX = Number.parseInt((startingCell.id.split('_'))[1]),
+    //         startY = Number.parseInt((startingCell.id.split('_'))[0]),
+    //         pointX = Number.parseInt((pointedCell.id.split('_'))[1]),
+    //         pointY = Number.parseInt((pointedCell.id.split('_'))[0]),
+    //         currentCell = {},
+    //         past = {},
+    //         left = {};
+    //     currentCell.X = snake.cells[0].X;
+    //     currentCell.Y = snake.cells[0].Y;
+    //     past.X = Math.abs(currentCell.X - startX);
+    //     past.Y = Math.abs(currentCell.Y - startY);
+    //     left.X = Math.abs(pointX - currentCell.X);
+    //     left.Y = Math.abs(pointY - currentCell.Y);
+    //     if(left.X + left.Y === 0){
+    //         pointedCell = null;
+    //     }
+    //     else{
+    //         if((left.X / (past.X + 1)) > (left.Y / (past.Y + 1))){
+    //             var oldDirX = direction.X;
+    //             direction.Y = 0;
+    //             direction.X = (pointX - startX) / Math.abs(pointX - startX);
+    //             if(oldDirX / direction.X === -1){
+    //                 if(pointY - startY === 0){
+    //                     direction.Y = 1;
+    //                     startingCell = document.getElementById('' + (currentCell.Y + direction.Y) + '_' + currentCell.X);
+    //                 }
+    //                 else{
+    //                     direction.Y = (pointY - startY) / Math.abs(pointY - startY);
+    //                 }
+    //                 direction.X = 0;
+    //             }
+    //         }
+    //         else {
+    //             var oldDirY = direction.Y;
+    //             direction.X = 0;
+    //             direction.Y = (pointY - startY) / Math.abs(pointY - startY);
+    //             if(oldDirY / direction.Y === -1){
+    //                 if(pointX - startX === 0){
+    //                     direction.X = 1;
+    //                     startingCell = document.getElementById('' + currentCell.Y + '_' + (currentCell.X + direction.X));
+    //                 }
+    //                 else{
+    //                     direction.X = (pointX - startX) / Math.abs(pointX - startX);
+    //                 }
+    //                 direction.Y = 0;
+    //             }
+    //         }
+    //     }
+
+    // };
+
     this.mouseDirection = function(){
-        var startX = Number.parseInt((startingCell.id.split('_'))[1]),
-            startY = Number.parseInt((startingCell.id.split('_'))[0]),
-            pointX = Number.parseInt((pointedCell.id.split('_'))[1]),
-            pointY = Number.parseInt((pointedCell.id.split('_'))[0]),
+        this.whereTo(startingCell, pointedCell);
+    };
+
+    this.pathDirection = function(){
+        if(!startToGoForPath){
+            startToGoForPath = field[snake.cells[0].Y][snake.cells[0].X];
+        }
+        if(this.startingPath()){
+            startToGoForPath = null;
+            if(path.length === 1){
+                this.whereTo(path[0], path[0]);
+            }
+            else{
+                this.whereTo(path[0], path[1]);
+            }
+            path[0].classList.remove('path');
+            path.shift();
+        }
+        else{
+            this.whereTo(startToGoForPath, path[0]);
+        }
+    };
+
+    this.startingPath = function(){
+        var result = false;
+        if((Number.parseInt((path[0].id.split('_'))[1]) == snake.cells[0].X) 
+        && (Number.parseInt((path[0].id.split('_'))[0]) == snake.cells[0].Y)){
+            result = true;
+        }
+        return result;
+    }
+
+    this.whereTo = function(start, finish){
+        var startX = Number.parseInt((start.id.split('_'))[1]),
+            startY = Number.parseInt((start.id.split('_'))[0]),
+            pointX = Number.parseInt((finish.id.split('_'))[1]),
+            pointY = Number.parseInt((finish.id.split('_'))[0]),
             currentCell = {},
             past = {},
             left = {};
@@ -167,8 +262,9 @@ function Snake() {
         past.Y = Math.abs(currentCell.Y - startY);
         left.X = Math.abs(pointX - currentCell.X);
         left.Y = Math.abs(pointY - currentCell.Y);
-        if(left.X + left.Y === 0){
-            pointedCell = null;
+        if(left.X === 0 && left.Y === 0){
+            finish = null;
+            // startToGoForPath = null;
         }
         else{
             if((left.X / (past.X + 1)) > (left.Y / (past.Y + 1))){
@@ -203,7 +299,7 @@ function Snake() {
             }
         }
 
-    }
+    };
 
     this.init = function() {
         this.clear();
@@ -242,8 +338,10 @@ function Snake() {
             for (var j = 0; j < Math.floor(width / (CELL_SIZE + 1)); j++) {
                 var td = document.createElement('td');
                 td.id = '' + i + '_' + j;
-                td.onmouseenter = function(event) {
+                td.onmouseover = function(event) {
                     pointedCell = event.target;
+                };
+                td.onmouseenter = function(event) {
                     startingCell = document.getElementById('' + snake.cells[0].Y + '_' + snake.cells[0].X);
                 };
                 tr.appendChild(td);
@@ -372,6 +470,30 @@ function Snake() {
                 break;
         }
         // event.preventDefault();
+    };
+
+    document.onmousedown = function(event) {
+        event.preventDefault();
+        mousedown = true;
+    };
+
+    document.onmousemove = function(event) {
+        if(event.target.tagName === 'TD'
+         && mousedown && 
+         !event.target.classList.contains('path')){
+            event.target.classList.add('path');
+            path.push(event.target);
+        }
+    };
+
+    document.onmouseup = function(event) {
+        if(event.target.tagName === 'TD'
+         && mousedown && 
+         !event.target.classList.contains('path')){
+            event.target.classList.add('path');
+            path.push(event.target);
+        }
+        mousedown = false;
     };
 
 };
