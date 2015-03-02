@@ -1,3 +1,2 @@
 draw a path, follow it, then to pointed cell
 prevent default on some standart things
-no border? wasn't a task
