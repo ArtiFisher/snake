@@ -57,24 +57,6 @@ function Snake() {
         return result;
     }
 
-    // this.crush = function() {
-    //     var lengthX = field[0].length,
-    //         lengthY = field.length,
-    //         result = false,
-    //         nextX,
-    //         nextY;
-    //     if ((nextX < 0) || (nextY < 0) || (nextX >= lengthX) || (nextY >= lengthY)) {
-    //         result = true;
-    //     }
-    //     var nextX = snake.cells[0].X + direction.X,
-    //         nextY = snake.cells[0].Y + direction.Y;
-            
-    //     if (field[nextY][nextX].classList.contains('snaked')) {
-    //         result = true;
-    //     }
-    //     return result;
-    // }
-
     this.nextY = function(){
         var lengthX = field[0].length,
             lengthY = field.length,
@@ -162,58 +144,6 @@ function Snake() {
             }
         }
     };
-
-    // this.mouseDirection = function(){
-    //     var startX = Number.parseInt((startingCell.id.split('_'))[1]),
-    //         startY = Number.parseInt((startingCell.id.split('_'))[0]),
-    //         pointX = Number.parseInt((pointedCell.id.split('_'))[1]),
-    //         pointY = Number.parseInt((pointedCell.id.split('_'))[0]),
-    //         currentCell = {},
-    //         past = {},
-    //         left = {};
-    //     currentCell.X = snake.cells[0].X;
-    //     currentCell.Y = snake.cells[0].Y;
-    //     past.X = Math.abs(currentCell.X - startX);
-    //     past.Y = Math.abs(currentCell.Y - startY);
-    //     left.X = Math.abs(pointX - currentCell.X);
-    //     left.Y = Math.abs(pointY - currentCell.Y);
-    //     if(left.X + left.Y === 0){
-    //         pointedCell = null;
-    //     }
-    //     else{
-    //         if((left.X / (past.X + 1)) > (left.Y / (past.Y + 1))){
-    //             var oldDirX = direction.X;
-    //             direction.Y = 0;
-    //             direction.X = (pointX - startX) / Math.abs(pointX - startX);
-    //             if(oldDirX / direction.X === -1){
-    //                 if(pointY - startY === 0){
-    //                     direction.Y = 1;
-    //                     startingCell = document.getElementById('' + (currentCell.Y + direction.Y) + '_' + currentCell.X);
-    //                 }
-    //                 else{
-    //                     direction.Y = (pointY - startY) / Math.abs(pointY - startY);
-    //                 }
-    //                 direction.X = 0;
-    //             }
-    //         }
-    //         else {
-    //             var oldDirY = direction.Y;
-    //             direction.X = 0;
-    //             direction.Y = (pointY - startY) / Math.abs(pointY - startY);
-    //             if(oldDirY / direction.Y === -1){
-    //                 if(pointX - startX === 0){
-    //                     direction.X = 1;
-    //                     startingCell = document.getElementById('' + currentCell.Y + '_' + (currentCell.X + direction.X));
-    //                 }
-    //                 else{
-    //                     direction.X = (pointX - startX) / Math.abs(pointX - startX);
-    //                 }
-    //                 direction.Y = 0;
-    //             }
-    //         }
-    //     }
-
-    // };
 
     this.mouseDirection = function(){
         this.whereTo(startingCell, pointedCell);
@@ -360,7 +290,9 @@ function Snake() {
             field[snake.cells[i].Y][snake.cells[i].X].classList.toggle('snaked');
         }
         this.createApple();
+        this.attachListeners();
         timeout = setTimeout(this.move.bind(this), INITIAL_DELAY);
+
     };
 
     this.clear = function() {
@@ -414,7 +346,14 @@ function Snake() {
         localStorage.records = JSON.stringify(array);
     }
 
-    document.onkeydown = function(event) {
+    this.attachListeners = function(){
+        addEventListener("keydown", onkeydown);
+        addEventListener("mousedown", onmousedown);
+        addEventListener("mouseup", onmouseup);
+        addEventListener("mousemove", onmousemove);
+    }
+
+    var onkeydown = function(event) {
         var oldDirection = {};
         oldDirection.X = direction.X;
         oldDirection.Y = direction.Y;
@@ -472,12 +411,12 @@ function Snake() {
         // event.preventDefault();
     };
 
-    document.onmousedown = function(event) {
+    var onmousedown = function(event) {
         event.preventDefault();
         mousedown = true;
     };
 
-    document.onmousemove = function(event) {
+    var onmousemove = function(event) {
         if(event.target.tagName === 'TD'
          && mousedown && 
          !event.target.classList.contains('path')){
@@ -486,7 +425,7 @@ function Snake() {
         }
     };
 
-    document.onmouseup = function(event) {
+    var onmouseup = function(event) {
         if(event.target.tagName === 'TD'
          && mousedown && 
          !event.target.classList.contains('path')){
